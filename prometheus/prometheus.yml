@@ -1,0 +1,24 @@
+global:
+  scrape_interval: 15s  # scrape every 15 seconds
+
+scrape_configs:
+  # Scrape Prometheus itself
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['prometheus:9090']
+
+  # Scrape web servers (exposed on port 80 inside Docker network)
+  - job_name: 'web-servers'
+    static_configs:
+      - targets: ['web-server-1:80', 'web-server-2:80']
+
+  # Scrape HAProxy (needs exporter later)
+  - job_name: 'haproxy'
+    static_configs:
+      - targets: ['haproxy:80']
+
+  # Scrape Jenkins
+  - job_name: 'jenkins'
+    metrics_path: /prometheus
+    static_configs:
+      - targets: ['jenkins:8080']
