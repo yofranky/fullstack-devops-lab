@@ -27,7 +27,7 @@ services:
     image: haproxy:latest
     container_name: haproxy
     volumes:
-      - ./load-balancer/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro  # read-only mount prevents WSL/MacOS permission issues
+      - ./load-balancer/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
     ports:
       - "80:80"  # VIP exposed to host
     depends_on:
@@ -48,7 +48,7 @@ services:
       MYSQL_USER: labuser
       MYSQL_PASSWORD: labpass
     volumes:
-      - db_data:/var/lib/mysql  # persistent database storage
+      - db_data:/var/lib/mysql
       - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     ports:
       - "3306:3306"
@@ -61,7 +61,7 @@ services:
   jenkins:
     image: jenkins/jenkins:lts
     container_name: jenkins
-    user: root  # ensures proper permissions in WSL
+    user: root
     ports:
       - "8080:8080"
       - "50000:50000"
@@ -81,10 +81,9 @@ services:
     ports:
       - "9090:9090"
     networks:
-      - monitoring-net  # dedicated monitoring network
-      - app-net         # attach to app-net so Prometheus can scrape web servers, HAProxy, Jenkins, and Node Exporters
-    # Notes: By connecting Prometheus to both networks, we maintain logical separation
-    # but still allow cross-network scraping
+      - monitoring-net
+      - app-net
+    # Prometheus can scrape services in both monitoring and app networks
 
   # -------------------------------
   # Grafana (Dashboards)
@@ -98,8 +97,8 @@ services:
       - grafana_data:/var/lib/grafana
       - ./grafana/provisioning:/etc/grafana/provisioning:ro
     networks:
-      - monitoring-net  # dashboards read metrics from Prometheus
-      - logging-net     # optional: access ELK stack if needed
+      - monitoring-net
+      - logging-net
 
   # -------------------------------
   # Elasticsearch (Logs Storage)
@@ -115,7 +114,7 @@ services:
     volumes:
       - es_data:/usr/share/elasticsearch/data
     networks:
-      - logging-net  # isolated logging network to separate ELK stack traffic
+      - logging-net
 
   # -------------------------------
   # Logstash (Log Ingest)
@@ -130,7 +129,7 @@ services:
     depends_on:
       - elasticsearch
     networks:
-      - logging-net  # connects only to logging-net
+      - logging-net
 
   # -------------------------------
   # Kibana (Log Dashboard)
@@ -154,7 +153,8 @@ services:
     image: prom/node-exporter:latest
     container_name: node-exporter-1
     networks:
-      - app-net  # exposes node metrics to Prometheus on app-net
+      - app-net
+      - monitoring-net
     ports:
       - "9100:9100"
 
@@ -163,6 +163,7 @@ services:
     container_name: node-exporter-2
     networks:
       - app-net
+      - monitoring-net
     ports:
       - "9101:9100"
 
@@ -179,6 +180,6 @@ volumes:
 # Networks
 # -------------------------------
 networks:
-  app-net:         # application layer: web servers, HAProxy, DB, Jenkins
-  monitoring-net:  # monitoring layer: Prometheus, Grafana
-  logging-net:     # logging layer: ELK stack
+  app-net:
+  monitoring-net:
+  logging-net:
