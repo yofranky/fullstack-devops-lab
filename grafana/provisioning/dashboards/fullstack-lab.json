@@ -1,0 +1,24 @@
+{
+  "dashboard": {
+    "id": null,
+    "uid": "fullstack-lab",
+    "title": "Fullstack DevOps Lab",
+    "tags": ["fullstack", "lab"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "type": "graph",
+        "title": "Node Exporter Metrics",
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "node_cpu_seconds_total",
+            "refId": "A"
+          }
+        ],
+        "gridPos": { "x": 0, "y": 0, "w": 24, "h": 8 }
+      }
+    ]
+  },
+  "overwrite": true
+}
